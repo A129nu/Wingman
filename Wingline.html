@@ -1,0 +1,1449 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Wingline</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one column, built for a phone. The energy picker sets the accent color for the whole page. */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --surface-2:#e8ecf0; --fg:#14181d; --muted:#586471; --line:#d5dbe2;
+  --g:#12805a; --g-ink:#ffffff;
+  --r:#cf2b44; --r-ink:#ffffff;
+  --b:#3559d6; --b-ink:#ffffff;
+  --accent:var(--b); --accent-ink:var(--b-ink);
+  --tint:color-mix(in srgb,var(--accent) 10%,var(--surface));
+  --font-display:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-body:'Instrument Sans',system-ui,-apple-system,'Segoe UI','Noto Sans','Noto Sans Devanagari','Noto Sans Tamil','Noto Sans Telugu',sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1215; --surface:#161b20; --surface-2:#1f262d; --fg:#e8edf2; --muted:#93a0ad; --line:#2b343c;
+    --g:#3fd49a; --g-ink:#06241a;
+    --r:#ff6277; --r-ink:#2a0610;
+    --b:#7c9bff; --b-ink:#0a1233;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1215; --surface:#161b20; --surface-2:#1f262d; --fg:#e8edf2; --muted:#93a0ad; --line:#2b343c;
+  --g:#3fd49a; --g-ink:#06241a;
+  --r:#ff6277; --r-ink:#2a0610;
+  --b:#7c9bff; --b-ink:#0a1233;
+  color-scheme:dark;
+}
+:root[data-mode="green"]{--accent:var(--g);--accent-ink:var(--g-ink)}
+:root[data-mode="red"]{--accent:var(--r);--accent-ink:var(--r-ink)}
+:root[data-mode="normal"]{--accent:var(--b);--accent-ink:var(--b-ink)}
+
+*{box-sizing:border-box}
+body{
+  background:var(--bg);color:var(--fg);
+  font:16px/1.5 var(--font-body);
+  padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:680px;margin-inline:auto;display:grid;gap:22px}
+.wrap>*{min-width:0}
+h1,h2,p{margin:0}
+.top{display:grid;gap:4px}
+.brand{display:flex;align-items:center;gap:8px;font:700 30px/1.1 var(--font-display);letter-spacing:-.01em;color:var(--fg)}
+.brand svg{color:var(--accent);flex:none}
+.tag{color:var(--muted)}
+.lbl{display:block;margin:0 0 8px;font:600 12px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.opt{text-transform:none;letter-spacing:0;font-weight:400;margin-left:6px}
+.hint{color:var(--muted);font-size:14px;margin-top:8px}
+.small{font-size:13px}
+
+/* girls */
+.girls{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:thin}
+.girl{flex:none;font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.girl:hover{border-color:var(--accent)}
+.girl[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.girl.add{color:var(--muted);border-style:dashed;background:transparent}
+.girl:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+
+/* segmented radios */
+fieldset{border:0;margin:0;padding:0;min-width:0}
+legend{padding:0}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px;padding:4px;background:var(--surface-2);border-radius:12px}
+.seg label{position:relative;min-width:0}
+.seg input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.seg span{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 6px;border-radius:9px;font-weight:600;font-size:14px;color:var(--muted);text-align:center;transition:background .15s,color .15s}
+.seg input:not(:checked)+span:hover{color:var(--fg)}
+.seg input:checked+span{background:var(--accent);color:var(--accent-ink)}
+.seg input:focus-visible+span{outline:2px solid var(--fg);outline-offset:2px}
+.modes span{padding:12px 6px}
+.modes label[data-m="green"] input:checked+span{background:var(--g);color:var(--g-ink)}
+.modes label[data-m="red"] input:checked+span{background:var(--r);color:var(--r-ink)}
+.modes label[data-m="normal"] input:checked+span{background:var(--b);color:var(--b-ink)}
+.modes svg{flex:none}
+.prefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+
+/* fields */
+textarea,input[type="text"],input[type="password"],select{width:100%;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+select{padding:11px 12px;height:46px}
+textarea{resize:vertical;min-height:112px}
+textarea::placeholder,input::placeholder{color:var(--muted);opacity:.85}
+textarea:focus-visible,input[type="text"]:focus-visible,input[type="password"]:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.chip{font:inherit;font-size:14px;padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--tint);border-color:var(--accent)}
+.chip:focus-visible,.copy:focus-visible,.x:focus-visible,.ghost:focus-visible,.primary:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.check{display:flex;align-items:center;gap:10px;margin-top:10px;font-size:14px;color:var(--muted);cursor:pointer}
+.check input{width:18px;height:18px;margin:0;accent-color:var(--accent);flex:none}
+
+/* collapsible panels */
+details{border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+summary{padding:14px;cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--muted);font-size:22px;line-height:1}
+details[open] summary::after{content:"\2212"}
+.ctxbody{padding:0 14px 14px;display:grid;gap:12px}
+.field{display:grid;gap:6px}
+.field .lbl{margin:0}
+.sr{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;pointer-events:none}
+.drop{display:grid;gap:4px;text-align:center;padding:18px 12px;border:1.5px dashed var(--line);border-radius:12px;cursor:pointer;color:var(--muted);background:var(--bg)}
+.drop strong{color:var(--accent)}
+.drop small{font-size:13px}
+.drop:hover,.drop.over{border-color:var(--accent)}
+.sr:focus-visible+.drop{outline:2px solid var(--accent);outline-offset:2px}
+.files{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.files li{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);min-width:0}
+.files img{width:36px;height:36px;object-fit:cover;border-radius:6px;flex:none}
+.ext{width:36px;height:36px;border-radius:6px;background:var(--surface-2);color:var(--muted);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.fname{min-width:0;flex:1}
+.fname b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;font-size:14px}
+.fname small{color:var(--muted);font-size:12px}
+.x{flex:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--muted);font:inherit;cursor:pointer}
+.x:hover{color:var(--fg);border-color:var(--muted)}
+.names{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.mem{font-size:14px;color:var(--fg);white-space:pre-wrap;overflow-wrap:anywhere}
+.mem.empty{color:var(--muted)}
+
+/* actions */
+.go{display:flex;gap:10px}
+.primary{flex:1;font:700 17px/1.2 var(--font-body);padding:15px 18px;border-radius:12px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;transition:filter .15s}
+.primary:hover:not(:disabled){filter:brightness(1.07)}
+.primary:disabled{opacity:.65;cursor:progress}
+.ghost{font:600 15px/1.2 var(--font-body);padding:14px 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer;display:inline-block;text-decoration:none;text-align:center}
+.ghost:hover{border-color:var(--accent)}
+.danger{color:var(--r);border-color:var(--r)}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.msg{font-size:14px;color:var(--muted)}
+.msg.err{color:var(--fg);border-left:3px solid var(--r);padding-left:10px}
+.msg:empty{display:none}
+
+/* results */
+.rhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.rhead .lbl{margin:0}
+.pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.pill{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.mode{color:var(--accent);border-color:var(--accent)}
+.read{color:var(--muted);font-size:14px;margin-bottom:12px}
+.note{border:1px solid var(--accent);background:var(--tint);border-radius:12px;padding:10px 12px;font-size:14px;margin-bottom:12px}
+.cards{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:8px}
+.ctop{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.clabel{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.copy{font:600 13px/1 var(--font-body);padding:8px 12px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+.copy:hover{border-color:var(--accent)}
+.bubble{padding:12px 15px;background:var(--accent);color:var(--accent-ink);border-radius:18px 18px 18px 6px;font-size:17px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;justify-self:start;max-width:100%}
+.mean{color:var(--fg);font-size:14px;border-top:1px dashed var(--line);padding-top:8px}
+.mean b{color:var(--muted);font-weight:600}
+.why{color:var(--muted);font-size:14px}
+.tweaks{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+.tweaks .lbl{margin:0 4px 0 0}
+.sk{height:64px;border-radius:18px;background:linear-gradient(90deg,var(--surface-2),var(--surface),var(--surface-2));background-size:200% 100%;animation:sh 1.4s linear infinite}
+@keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
+.steps{display:grid;gap:12px}
+.step{display:grid;gap:10px}
+.step .ghost{justify-self:start}
+.ro{font-size:13px;min-height:96px}
+.step details{background:var(--bg)}
+.step summary{padding:10px 12px;font-size:14px}
+.step .ctxbody{padding:0 12px 12px}
+.foot{color:var(--muted);font-size:13px;text-align:center}
+a.lnk{color:var(--accent)}
+@media (min-width:720px){
+  body{padding-block:36px 64px}
+  .wrap{gap:26px}
+  .seg span{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<main class="wrap">
+  <header class="top">
+    <h1 class="brand">
+      <svg viewBox="0 0 16 16" width="26" height="26" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><path d="M3.8 2.5h8.2l-2.2 3 2.2 3H3.8z" fill="currentColor"/></svg>
+      Wingline
+    </h1>
+    <p class="tag">Paste what she said. Get the message to send back, in her language.</p>
+  </header>
+
+  <section aria-labelledby="h-girls">
+    <h2 class="lbl" id="h-girls">Who are you talking to</h2>
+    <div class="girls" id="girls" role="group" aria-labelledby="h-girls"></div>
+    <details id="prof" style="margin-top:10px">
+      <summary><span id="profTitle">Her profile</span></summary>
+      <div class="ctxbody">
+        <div class="field">
+          <label class="lbl" for="gName">Name</label>
+          <input id="gName" type="text" maxlength="30">
+        </div>
+        <div class="field">
+          <label class="lbl" for="gNotes">What you know about her <span class="opt">optional</span></label>
+          <textarea id="gNotes" rows="3" maxlength="600" placeholder="Likes, job, how you met, things she hates. Anything that helps the replies fit her."></textarea>
+        </div>
+        <div class="field">
+          <p class="lbl">What Wingline has learned</p>
+          <p class="mem empty" id="gMem"></p>
+        </div>
+        <div class="row">
+          <button class="ghost" id="gForget" type="button">Forget what it learned</button>
+          <button class="ghost danger" id="gDel" type="button">Delete this girl</button>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section aria-labelledby="h-energy">
+    <h2 class="lbl" id="h-energy">Energy</h2>
+    <div class="seg modes" role="radiogroup" aria-labelledby="h-energy">
+      <label data-m="green"><input type="radio" name="mode" value="green"><span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><path d="M3.8 2.5h8.2l-2.2 3 2.2 3H3.8z" fill="currentColor"/></svg>Green flag</span></label>
+      <label data-m="normal"><input type="radio" name="mode" value="normal"><span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><path d="M3.8 2.5h8.2l-2.2 3 2.2 3H3.8z" fill="currentColor"/></svg>Normal</span></label>
+      <label data-m="red"><input type="radio" name="mode" value="red"><span><svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3 1.5v13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/><path d="M3.8 2.5h8.2l-2.2 3 2.2 3H3.8z" fill="currentColor"/></svg>Red flag</span></label>
+    </div>
+    <p class="hint" id="modeDesc"></p>
+  </section>
+
+  <section>
+    <label class="lbl" for="her">What she said <span class="opt">leave empty to get your next message</span></label>
+    <textarea id="her" rows="4" maxlength="4000" placeholder="Paste her last message, or the last few, in any language. Even a plain Hi works. Empty means you want to send the next message yourself."></textarea>
+  </section>
+
+  <fieldset>
+    <legend class="lbl">What do you need</legend>
+    <div class="seg">
+      <label><input type="radio" name="task" value="reply"><span>Next message</span></label>
+      <label><input type="radio" name="task" value="topic"><span>Change the topic</span></label>
+    </div>
+  </fieldset>
+
+  <section>
+    <label class="lbl" for="intent">What you want to do <span class="opt">optional</span></label>
+    <div class="chips" id="chips">
+      <button type="button" class="chip" aria-pressed="false">Keep it going</button>
+      <button type="button" class="chip" aria-pressed="false">Make her laugh</button>
+      <button type="button" class="chip" aria-pressed="false">Flirt back</button>
+      <button type="button" class="chip" aria-pressed="false">Ask her out</button>
+      <button type="button" class="chip" aria-pressed="false">Revive the chat</button>
+    </div>
+    <input id="intent" type="text" maxlength="160" placeholder="Or say it your way, like: ask her out for Sunday, or move to travel">
+  </section>
+
+  <section>
+    <label class="lbl" for="ctxNote">Extra context <span class="opt">optional</span></label>
+    <textarea id="ctxNote" rows="2" maxlength="800" placeholder="Anything that should shape this message: what happened today, her mood, a plan, what you want her to feel."></textarea>
+    <label class="check"><input type="checkbox" id="buzz"><span>Use today's trends, memes and news</span></label>
+    <p class="hint small" id="buzzHint"></p>
+  </section>
+
+  <div class="prefs">
+    <fieldset>
+      <legend class="lbl">Length</legend>
+      <div class="seg">
+        <label><input type="radio" name="length" value="short"><span>Short</span></label>
+        <label><input type="radio" name="length" value="medium"><span>Medium</span></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend class="lbl">Emojis</legend>
+      <div class="seg">
+        <label><input type="radio" name="emoji" value="none"><span>None</span></label>
+        <label><input type="radio" name="emoji" value="few"><span>A few</span></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend class="lbl">Reply language</legend>
+      <select id="lang" aria-label="Reply language"></select>
+    </fieldset>
+  </div>
+
+  <fieldset>
+    <legend class="lbl">Write with</legend>
+    <div class="seg">
+      <label id="engClaude"><input type="radio" name="engine" value="claude"><span>Claude</span></label>
+      <label id="engGemini"><input type="radio" name="engine" value="gemini"><span>Gemini</span></label>
+      <label id="engGpt"><input type="radio" name="engine" value="chatgpt"><span>ChatGPT</span></label>
+    </div>
+    <p class="hint" id="engineHint"></p>
+    <div class="field" id="keyBox" style="margin-top:12px" hidden>
+      <label class="lbl" for="apiKey" id="keyLbl">API key</label>
+      <input id="apiKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key">
+      <p class="hint small" style="margin-top:0"><span id="keyTxt"></span> <a class="lnk" id="keyLink" target="_blank" rel="noopener noreferrer"></a>. It stays on this phone and is sent only to the provider when you tap the button.</p>
+    </div>
+    <label class="check" id="lightWrap"><input type="checkbox" id="light"><span>Use the lighter Claude model to save usage</span></label>
+  </fieldset>
+
+  <details id="ctx">
+    <summary><span>Add chat for context <span class="opt">optional</span></span></summary>
+    <div class="ctxbody">
+      <input class="sr" id="file" type="file" multiple accept=".txt,.md,.csv,.log,.pdf,text/plain,application/pdf,image/png,image/jpeg,image/webp,image/gif">
+      <label class="drop" id="drop" for="file">
+        <span><strong>Choose files</strong> or drop them here</span>
+        <small>Text or WhatsApp export, PDF, or screenshots (PNG, JPG, WebP)</small>
+      </label>
+      <ul class="files" id="files"></ul>
+      <div class="names">
+        <input id="herName" type="text" maxlength="40" aria-label="Her name as shown in the chat" placeholder="Her name in the chat">
+        <input id="meName" type="text" maxlength="40" aria-label="Your name as shown in the chat" placeholder="Your name in the chat">
+      </div>
+      <p class="hint small">Text and PDF chats are saved in this girl's profile on this device, so you do not add them again. Screenshots are used once. What they reveal is kept as short notes instead.</p>
+    </div>
+  </details>
+
+  <div>
+    <div class="go">
+      <button class="primary" id="go" type="button">Suggest my next message</button>
+      <button class="ghost" id="stop" type="button" hidden>Stop</button>
+    </div>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+    <p class="hint small">Chats you add are sent to the model you picked only when you tap the button.</p>
+  </div>
+
+  <section id="results" aria-label="Suggested replies" aria-live="polite"></section>
+
+  <details id="settings">
+    <summary><span>Settings and data</span></summary>
+    <div class="ctxbody">
+      <p class="hint" id="storeNote" style="margin-top:0"></p>
+      <div id="modelBox" class="ctxbody" style="padding:0">
+        <div class="field">
+          <label class="lbl" for="gemModel">Gemini model</label>
+          <input id="gemModel" type="text" autocomplete="off" placeholder="gemini-2.5-flash">
+        </div>
+        <div class="field">
+          <label class="lbl" for="gptModel">OpenAI model</label>
+          <input id="gptModel" type="text" autocomplete="off" placeholder="gpt-6-luna">
+        </div>
+        <p class="hint small" style="margin-top:0">Change these if a provider renames or retires a model.</p>
+      </div>
+      <div class="field">
+        <label class="lbl" for="region">Your region, for local trends</label>
+        <input id="region" type="text" maxlength="60" autocomplete="off" placeholder="India">
+      </div>
+      <p class="hint small" style="margin-top:0">Your API keys stay on this phone, and backups never include them.</p>
+      <div class="row">
+        <button class="ghost" id="exp" type="button">Export backup</button>
+        <input class="sr" type="file" id="imp" accept=".json,application/json">
+        <label class="ghost" for="imp">Import backup</label>
+      </div>
+      <button class="ghost danger" id="wipe" type="button" style="justify-self:start">Delete all girls and chats</button>
+      <p class="hint small" id="dataMsg" style="margin-top:0"></p>
+    </div>
+  </details>
+
+  <p class="foot">Playful is not pushy. If she says no or goes quiet, let it be.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var root = document.documentElement;
+  var IN_CLAUDE = !!(window.claude && window.claude.use);
+
+  var PDF_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  var PDF_WORKER = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  var TEXT_BUDGET = 60000;
+  var CHAT_KEEP = 40000;
+  var MAX_CHATS = 10;
+  var MAX_FILES = 8;
+  var LOG_MAX = 60;
+  var MEM_MAX = 1500;
+
+  var MODES = {
+    green: {
+      name: 'Green flag',
+      desc: 'Warm, attentive and sincere. Makes her feel seen and a little special.',
+      brief: 'GREEN FLAG: warm, attentive and emotionally available. He listens, remembers details, shows real interest and makes her feel seen and a little special. Sincere, with light humor and gentle flirting. Confident without games.'
+    },
+    normal: {
+      name: 'Normal',
+      desc: 'Relaxed and natural. Easy to talk to, with a hint of interest.',
+      brief: 'NORMAL: relaxed, natural and friendly. Easy to talk to, light humor, a hint of interest, nothing forced. The kind of reply a funny, confident, kind guy sends on a good day.'
+    },
+    red: {
+      name: 'Red flag',
+      desc: 'Confident, teasing, a little trouble. Playful attitude, never mean.',
+      brief: 'RED FLAG: playful bad-boy energy. Confident, a bit cocky, teasing, unbothered and slightly mysterious. He can joke that he is a red flag, take mock-dramatic stands, give her a harmless hard time and keep her guessing. It is attitude and humor: the joke is on him or shared between them, and she should be able to laugh at it. Underneath it stays charming. No real cruelty, no actual manipulation, jealousy or mind games.'
+    }
+  };
+
+  var TWEAKS = {
+    shorter: ['Shorter', 'Make every option noticeably shorter than before.'],
+    funnier: ['Funnier', 'Make every option funnier, with a sharper joke.'],
+    flirty: ['More flirty', 'Make every option more flirty, with a bit more tension, still tasteful.'],
+    softer: ['Softer', 'Make every option softer and more sincere.'],
+    bolder: ['Bolder', 'Make every option bolder and more confident.']
+  };
+
+  var ENGINES = {
+    claude: { name: 'Claude' },
+    gemini: { name: 'Gemini' },
+    chatgpt: { name: 'ChatGPT' }
+  };
+
+  var LANGS = [
+    ['auto', 'Auto (match her)'], ['English', 'English'], ['Hindi', 'Hindi'], ['Hinglish', 'Hinglish (Roman)'],
+    ['Marathi', 'Marathi'], ['Tamil', 'Tamil'], ['Telugu', 'Telugu'], ['Kannada', 'Kannada'],
+    ['Malayalam', 'Malayalam'], ['Bengali', 'Bengali'], ['Gujarati', 'Gujarati'], ['Punjabi', 'Punjabi'], ['Urdu', 'Urdu']
+  ];
+
+  var HER_EXAMPLE = 'so you never told me how the interview went 👀';
+  var EXAMPLES = {
+    green: [
+      { label: 'Warm', text: 'It went really well, and you remembering to ask made my day better. Want the full story now or over coffee this weekend?', why: 'Shows you value that she remembered, then offers an easy next step.' },
+      { label: 'Sincere', text: "Better than I expected. I kept wanting to tell you first, you're the one who'd actually get excited about it.", why: 'One honest line that makes her feel like your first call.' }
+    ],
+    normal: [
+      { label: 'Casual', text: "Ha, it went well. Pretty sure I talked too much, but they seemed to like it. How's your day going?", why: 'Light self-teasing and an easy question back.' },
+      { label: 'Dry', text: "Went well. Still waiting to hear back, so I'm acting very calm about it.", why: 'Relaxed humor that keeps the chat moving.' }
+    ],
+    red: [
+      { label: 'Cocky', text: "It went great. Obviously. But I'm a red flag, so I was never going to tell you before you asked twice 😏", why: 'Owns the attitude with a joke she can laugh at.' },
+      { label: 'Teasing', text: 'I was saving the story until you got curious. Took you long enough 😌', why: 'Playful confidence that makes her chase the story a little.' }
+    ]
+  };
+
+  /* ---------- data ---------- */
+  var D = {
+    v: 1, girls: [], activeId: null,
+    settings: { task: 'reply', mode: 'green', length: 'short', emoji: 'few', engine: IN_CLAUDE ? 'claude' : 'gemini', light: true, buzz: !IN_CLAUDE, region: 'India', gemKey: '', gemModel: 'gemini-2.5-flash', gptKey: '', gptModel: 'gpt-6-luna' }
+  };
+  var st = { files: [], busy: false, ctl: null, last: null, nid: 0, noSample: false };
+
+  function S() { return D.settings; }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+  function str(v, n) { return typeof v === 'string' ? v.slice(0, n) : ''; }
+  function tail(v, n) { return typeof v === 'string' ? v.slice(-n) : ''; }
+
+  var Store = (function () {
+    var idb = null, mode = 'mem', mem = {};
+    function fallback() {
+      try { localStorage.setItem('wl:t', '1'); localStorage.removeItem('wl:t'); mode = 'ls'; } catch (e) { mode = 'mem'; }
+    }
+    function open() {
+      return new Promise(function (res) {
+        try {
+          var rq = indexedDB.open('wingline', 1);
+          rq.onupgradeneeded = function () { rq.result.createObjectStore('kv'); };
+          rq.onsuccess = function () { idb = rq.result; mode = 'idb'; res(); };
+          rq.onerror = function () { fallback(); res(); };
+          rq.onblocked = function () { fallback(); res(); };
+        } catch (e) { fallback(); res(); }
+      });
+    }
+    function get(k) {
+      return new Promise(function (res) {
+        if (mode === 'idb') {
+          try {
+            var r = idb.transaction('kv', 'readonly').objectStore('kv').get(k);
+            r.onsuccess = function () { res(r.result); };
+            r.onerror = function () { res(undefined); };
+            return;
+          } catch (e) {}
+        }
+        if (mode === 'ls') {
+          try { var s = localStorage.getItem('wl:' + k); res(s ? JSON.parse(s) : undefined); return; } catch (e) {}
+        }
+        res(mem[k]);
+      });
+    }
+    function set(k, v) {
+      return new Promise(function (res) {
+        if (mode === 'idb') {
+          try {
+            var t = idb.transaction('kv', 'readwrite');
+            t.objectStore('kv').put(v, k);
+            t.oncomplete = function () { res(true); };
+            t.onerror = function () { res(false); };
+            t.onabort = function () { res(false); };
+            return;
+          } catch (e) {}
+        }
+        if (mode === 'ls') {
+          try { localStorage.setItem('wl:' + k, JSON.stringify(v)); res(true); return; } catch (e) {}
+        }
+        mem[k] = v;
+        res(false);
+      });
+    }
+    return { open: open, get: get, set: set, mode: function () { return mode; } };
+  })();
+
+  var saveT = null;
+  function persist() {
+    clearTimeout(saveT);
+    saveT = setTimeout(function () { Store.set('state', D); }, 250);
+  }
+
+  function cleanGirl(o, keepId) {
+    o = o || {};
+    var chats = (Array.isArray(o.chats) ? o.chats : []).slice(0, MAX_CHATS).map(function (c) {
+      return { id: (keepId && typeof c.id === 'string') ? c.id : uid(), name: str(c.name, 80) || 'chat', text: tail(c.text, CHAT_KEEP), meta: str(c.meta, 60), added: Number(c.added) || Date.now() };
+    }).filter(function (c) { return c.text; });
+    var log = (Array.isArray(o.log) ? o.log : []).slice(-LOG_MAX).map(function (e) {
+      return { r: e && e.r === 'me' ? 'me' : 'her', x: str(e && e.x, 500), t: Number(e && e.t) || 0 };
+    }).filter(function (e) { return e.x; });
+    return {
+      id: (keepId && typeof o.id === 'string') ? o.id : uid(),
+      name: str(o.name, 30) || 'Girl',
+      notes: str(o.notes, 600),
+      lang: str(o.lang, 20) || 'auto',
+      herName: str(o.herName, 40),
+      meName: str(o.meName, 40),
+      memory: str(o.memory, MEM_MAX),
+      detected: str(o.detected, 40),
+      chats: chats,
+      log: log,
+      created: Number(o.created) || Date.now()
+    };
+  }
+
+  function defaultName() {
+    var n = D.girls.length + 1;
+    var names = D.girls.map(function (g) { return g.name; });
+    while (names.indexOf('Girl ' + n) >= 0) n++;
+    return 'Girl ' + n;
+  }
+  function addGirl() {
+    var g = cleanGirl({ name: defaultName() }, false);
+    D.girls.push(g);
+    return g;
+  }
+  function girl() {
+    for (var i = 0; i < D.girls.length; i++) if (D.girls[i].id === D.activeId) return D.girls[i];
+    return D.girls[0];
+  }
+
+  /* ---------- small helpers ---------- */
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function setMsg(t, isErr) {
+    var m = $('msg');
+    m.textContent = t || '';
+    m.className = 'msg' + (isErr ? ' err' : '');
+  }
+  function reducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  var samplePromise = (async function () {
+    if (!IN_CLAUDE) return null;
+    try { return await window.claude.use('sample'); } catch (e) { return null; }
+  })();
+  samplePromise.then(function (s) {
+    if (IN_CLAUDE && !s) {
+      st.noSample = true;
+      if (S().engine === 'claude') setMsg('Writing with Claude is not available here right now.', true);
+      updateEngineUI();
+    }
+  });
+
+  /* ---------- settings UI ---------- */
+  function curKey() { var s = S(); return s.engine === 'gemini' ? s.gemKey : s.engine === 'chatgpt' ? s.gptKey : ''; }
+  function syncUI() {
+    var s = S();
+    ['task', 'mode', 'length', 'emoji', 'engine'].forEach(function (n) {
+      var r = document.querySelector('input[name="' + n + '"][value="' + s[n] + '"]');
+      if (r) r.checked = true;
+    });
+    $('light').checked = !!s.light;
+    $('buzz').checked = !!s.buzz;
+    $('gemModel').value = s.gemModel || '';
+    $('gptModel').value = s.gptModel || '';
+    $('region').value = s.region || '';
+  }
+  function applyMode() {
+    root.setAttribute('data-mode', S().mode);
+    $('modeDesc').textContent = MODES[S().mode].desc;
+    if (!st.last && !st.busy) renderExample();
+  }
+  function updateGo() {
+    if (st.busy) return;
+    var s = S();
+    $('go').textContent = s.task === 'topic' ? 'Suggest a topic change' : ($('her').value.trim() ? 'Write my reply' : 'Suggest my next message');
+    $('go').disabled = s.engine === 'claude' && st.noSample;
+  }
+  function updateEngineUI() {
+    var s = S();
+    var claude = s.engine === 'claude';
+    $('engClaude').hidden = !IN_CLAUDE;
+    $('lightWrap').hidden = !claude;
+    $('keyBox').hidden = claude;
+    $('buzz').disabled = claude;
+    var hint;
+    if (claude) {
+      hint = 'Messages are written on this page. The lighter model uses less of your Claude allowance.';
+    } else {
+      var gem = s.engine === 'gemini';
+      $('keyLbl').textContent = gem ? 'Gemini API key' : 'OpenAI API key';
+      $('apiKey').value = (gem ? s.gemKey : s.gptKey) || '';
+      $('keyTxt').textContent = gem ? 'Free key, separate from a Gemini subscription:' : 'Billed per use, separate from a ChatGPT subscription:';
+      $('keyLink').textContent = gem ? 'aistudio.google.com/apikey' : 'platform.openai.com/api-keys';
+      $('keyLink').href = gem ? 'https://aistudio.google.com/apikey' : 'https://platform.openai.com/api-keys';
+      hint = IN_CLAUDE
+        ? 'You can set your ' + (gem ? 'Gemini' : 'OpenAI') + ' key here, but this Claude page cannot connect to it. Open the installed Wingline app to write with ' + ENGINES[s.engine].name + '.'
+        : 'Messages are written right here with your own ' + (gem ? 'Gemini' : 'OpenAI') + ' key.';
+    }
+    $('engineHint').textContent = hint;
+    $('buzzHint').textContent = claude
+      ? "Claude on this page can't look things up live. Use the extra context box, or switch to Gemini or ChatGPT in the installed app."
+      : 'Searches the web for what is trending today in ' + (s.region || 'your region') + ' before writing, and works one fresh reference in when it fits.';
+    updateGo();
+  }
+  document.querySelectorAll('input[type="radio"]').forEach(function (r) {
+    r.addEventListener('change', function () {
+      S()[r.name] = r.value;
+      updateEngineUI();
+      applyMode();
+      persist();
+    });
+  });
+  $('light').addEventListener('change', function () { S().light = $('light').checked; persist(); });
+  $('buzz').addEventListener('change', function () { S().buzz = $('buzz').checked; persist(); });
+  $('apiKey').addEventListener('input', function () {
+    var s = S(), v = $('apiKey').value.trim();
+    if (s.engine === 'gemini') s.gemKey = v; else if (s.engine === 'chatgpt') s.gptKey = v;
+    persist();
+  });
+  $('gemModel').addEventListener('input', function () { S().gemModel = $('gemModel').value.trim(); persist(); });
+  $('gptModel').addEventListener('input', function () { S().gptModel = $('gptModel').value.trim(); persist(); });
+  $('region').addEventListener('input', function () { S().region = $('region').value.trim().slice(0, 60); persist(); updateEngineUI(); });
+  $('her').addEventListener('input', updateGo);
+
+  /* ---------- intent chips ---------- */
+  var chips = Array.prototype.slice.call(document.querySelectorAll('#chips .chip'));
+  function syncChips() {
+    var v = $('intent').value.trim().toLowerCase();
+    chips.forEach(function (c) { c.setAttribute('aria-pressed', c.textContent.toLowerCase() === v ? 'true' : 'false'); });
+  }
+  chips.forEach(function (c) {
+    c.addEventListener('click', function () {
+      var same = c.getAttribute('aria-pressed') === 'true';
+      $('intent').value = same ? '' : c.textContent;
+      syncChips();
+    });
+  });
+  $('intent').addEventListener('input', syncChips);
+
+  /* ---------- girls ---------- */
+  LANGS.forEach(function (l) {
+    var o = el('option', null, l[1]);
+    o.value = l[0];
+    $('lang').append(o);
+  });
+
+  function renderGirls() {
+    var box = $('girls');
+    box.replaceChildren();
+    D.girls.forEach(function (g) {
+      var b = el('button', 'girl', g.name);
+      b.type = 'button';
+      b.setAttribute('aria-pressed', g.id === girl().id ? 'true' : 'false');
+      b.addEventListener('click', function () { selectGirl(g.id); });
+      box.append(b);
+    });
+    var add = el('button', 'girl add', '+ Add girl');
+    add.type = 'button';
+    add.addEventListener('click', function () {
+      var g = addGirl();
+      persist();
+      selectGirl(g.id);
+      $('prof').open = true;
+      $('gName').focus();
+      $('gName').select();
+    });
+    box.append(add);
+  }
+
+  function releaseFiles() {
+    st.files.forEach(function (f) { if (f.url) URL.revokeObjectURL(f.url); });
+    st.files = [];
+  }
+
+  function loadGirlUI() {
+    var g = girl();
+    $('profTitle').textContent = g.name + ' profile';
+    $('gName').value = g.name;
+    $('gNotes').value = g.notes;
+    $('lang').value = g.lang;
+    $('herName').value = g.herName;
+    $('meName').value = g.meName;
+    var mem = $('gMem');
+    var bits = [];
+    if (g.detected) bits.push('Her language: ' + g.detected);
+    if (g.memory) bits.push(g.memory);
+    mem.textContent = bits.length ? bits.join('\n') : 'Nothing yet. After each reply it keeps short notes about her here.';
+    mem.className = 'mem' + (bits.length ? '' : ' empty');
+  }
+
+  function selectGirl(id) {
+    D.activeId = id;
+    st.last = null;
+    releaseFiles();
+    $('her').value = '';
+    $('ctxNote').value = '';
+    $('intent').value = '';
+    syncChips();
+    setMsg('');
+    loadGirlUI();
+    renderGirls();
+    renderFiles();
+    renderExample();
+    updateGo();
+    persist();
+  }
+
+  $('gName').addEventListener('input', function () {
+    var g = girl();
+    g.name = $('gName').value.trim().slice(0, 30) || 'Girl';
+    $('profTitle').textContent = g.name + ' profile';
+    renderGirls();
+    persist();
+  });
+  $('gNotes').addEventListener('input', function () { girl().notes = $('gNotes').value.slice(0, 600); persist(); });
+  $('lang').addEventListener('change', function () { girl().lang = $('lang').value; persist(); });
+  $('herName').addEventListener('input', function () { girl().herName = $('herName').value.trim(); persist(); });
+  $('meName').addEventListener('input', function () { girl().meName = $('meName').value.trim(); persist(); });
+
+  $('gForget').addEventListener('click', function () {
+    var g = girl();
+    g.memory = '';
+    g.detected = '';
+    g.log = [];
+    persist();
+    loadGirlUI();
+  });
+
+  function armDanger(btn, idleText, armedText, action) {
+    var t = null;
+    btn.addEventListener('click', function () {
+      if (btn.dataset.armed === '1') {
+        clearTimeout(t);
+        btn.dataset.armed = '0';
+        btn.textContent = idleText;
+        action();
+        return;
+      }
+      btn.dataset.armed = '1';
+      btn.textContent = armedText;
+      t = setTimeout(function () { btn.dataset.armed = '0'; btn.textContent = idleText; }, 4000);
+    });
+  }
+  armDanger($('gDel'), 'Delete this girl', 'Tap again to delete', function () {
+    var id = girl().id;
+    D.girls = D.girls.filter(function (g) { return g.id !== id; });
+    if (!D.girls.length) addGirl();
+    selectGirl(D.girls[0].id);
+    $('prof').open = false;
+  });
+  armDanger($('wipe'), 'Delete all girls and chats', 'Tap again to delete everything', function () {
+    D.girls = [];
+    addGirl();
+    selectGirl(D.girls[0].id);
+    $('dataMsg').textContent = 'Everything was deleted.';
+  });
+
+  function pushLog(r, x) {
+    var g = girl();
+    x = String(x || '').trim();
+    if (!x) return;
+    var last = g.log[g.log.length - 1];
+    if (last && last.r === r && last.x === x.slice(0, 500)) return;
+    g.log.push({ r: r, x: x.slice(0, 500), t: Date.now() });
+    if (g.log.length > LOG_MAX) g.log = g.log.slice(-LOG_MAX);
+    persist();
+  }
+
+  /* ---------- files ---------- */
+  var IMG_MIME = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', webp: 'image/webp', gif: 'image/gif' };
+  var TEXT_EXT = ['txt', 'md', 'csv', 'log'];
+
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement('script');
+      var t = setTimeout(function () { reject(new Error('timeout')); }, 20000);
+      s.src = src;
+      s.onload = function () { clearTimeout(t); resolve(); };
+      s.onerror = function () { clearTimeout(t); reject(new Error('load')); };
+      document.head.appendChild(s);
+    });
+  }
+  var pdfReady = null;
+  function loadPdfJs() {
+    if (!pdfReady) {
+      pdfReady = (async function () {
+        if (!window.pdfjsLib) await loadScript(PDF_SRC);
+        if (!window.pdfjsWorker) await loadScript(PDF_WORKER);
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER;
+        return window.pdfjsLib;
+      })();
+      pdfReady.catch(function () { pdfReady = null; });
+    }
+    return pdfReady;
+  }
+
+  async function readPdf(f) {
+    var lib = await loadPdfJs();
+    var buf = await f.arrayBuffer();
+    var pdf = await lib.getDocument({ data: new Uint8Array(buf) }).promise;
+    var text = '';
+    var pages = Math.min(pdf.numPages, 300);
+    for (var p = 1; p <= pages; p++) {
+      var page = await pdf.getPage(p);
+      var tc = await page.getTextContent();
+      var line = '';
+      tc.items.forEach(function (it) { line += it.str + (it.hasEOL ? '\n' : ' '); });
+      text += line + '\n';
+    }
+    text = text.replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    if (text.length >= 40) {
+      return { name: f.name, ext: 'PDF', text: text, blobs: [], meta: pdf.numPages + ' pages, text read' };
+    }
+    var blobs = [];
+    var from = Math.max(1, pdf.numPages - 3);
+    for (var q = from; q <= pdf.numPages; q++) {
+      var pg = await pdf.getPage(q);
+      var vp = pg.getViewport({ scale: 1.5 });
+      var cv = document.createElement('canvas');
+      cv.width = Math.floor(vp.width);
+      cv.height = Math.floor(vp.height);
+      await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
+      var blob = await new Promise(function (res) { cv.toBlob(res, 'image/jpeg', 0.82); });
+      if (blob) blobs.push(blob);
+    }
+    if (!blobs.length) throw new Error('empty');
+    return { name: f.name, ext: 'PDF', text: '', blobs: blobs, meta: 'scanned, last ' + blobs.length + ' pages used once' };
+  }
+
+  async function readFile(f) {
+    var ext = (f.name.split('.').pop() || '').toLowerCase();
+    if (IMG_MIME[ext] || /^image\/(png|jpeg|webp|gif)$/.test(f.type)) {
+      var mime = IMG_MIME[ext] || f.type;
+      if (f.size > 20 * 1024 * 1024) throw new Error('That image is over 20 MB.');
+      var blob = new Blob([f], { type: mime });
+      return { name: f.name, ext: 'IMG', text: '', blobs: [blob], url: URL.createObjectURL(blob), meta: 'screenshot, used once' };
+    }
+    if (f.type.indexOf('image/') === 0) throw new Error(f.name + ' is not a supported image type. Use PNG, JPG or WebP.');
+    if (f.type === 'application/pdf' || ext === 'pdf') {
+      try { return await readPdf(f); }
+      catch (e) { throw new Error("Couldn't read " + f.name + '. Paste the text or add screenshots instead.'); }
+    }
+    if (f.type.indexOf('text/') === 0 || TEXT_EXT.indexOf(ext) >= 0) {
+      var t = (await f.text()).trim();
+      if (!t) throw new Error(f.name + ' is empty.');
+      return { name: f.name, ext: 'TXT', text: t, blobs: [], meta: t.length.toLocaleString() + ' characters' };
+    }
+    throw new Error(f.name + ' is not a type this can read. Use text, PDF or images.');
+  }
+
+  async function addFiles(list) {
+    var arr = Array.prototype.slice.call(list);
+    var problems = [];
+    var g = girl();
+    for (var i = 0; i < arr.length; i++) {
+      try {
+        var item = await readFile(arr[i]);
+        if (item.text) {
+          if (g.chats.length >= MAX_CHATS) { problems.push('Up to ' + MAX_CHATS + ' saved chats per girl. Remove one first.'); continue; }
+          g.chats.push({ id: uid(), name: item.name, text: tail(item.text, CHAT_KEEP), meta: item.meta, added: Date.now() });
+          persist();
+        } else {
+          if (st.files.length >= MAX_FILES) { problems.push('Up to ' + MAX_FILES + ' screenshots at a time.'); continue; }
+          item.id = ++st.nid;
+          st.files.push(item);
+        }
+      } catch (e) { problems.push(e.message || 'Could not read a file.'); }
+      renderFiles();
+    }
+    setMsg(problems.join(' '), problems.length > 0);
+    $('file').value = '';
+  }
+
+  function fileRow(name, meta, thumbUrl, ext, onRemove) {
+    var li = el('li');
+    if (thumbUrl) { var im = el('img'); im.src = thumbUrl; im.alt = ''; li.append(im); }
+    else li.append(el('div', 'ext', ext));
+    var nm = el('div', 'fname');
+    nm.append(el('b', null, name), el('small', null, meta));
+    var x = el('button', 'x', '×');
+    x.type = 'button';
+    x.setAttribute('aria-label', 'Remove ' + name);
+    x.addEventListener('click', onRemove);
+    li.append(nm, x);
+    return li;
+  }
+
+  function renderFiles() {
+    var ul = $('files');
+    ul.replaceChildren();
+    var g = girl();
+    g.chats.forEach(function (c) {
+      ul.append(fileRow(c.name, c.meta + ', saved on this device', '', 'TXT', function () {
+        g.chats = g.chats.filter(function (d) { return d.id !== c.id; });
+        persist();
+        renderFiles();
+      }));
+    });
+    st.files.forEach(function (f) {
+      ul.append(fileRow(f.name, f.meta, f.url || '', f.ext, function () {
+        st.files = st.files.filter(function (h) { return h.id !== f.id; });
+        if (f.url) URL.revokeObjectURL(f.url);
+        renderFiles();
+      }));
+    });
+  }
+
+  $('file').addEventListener('change', function (e) { if (e.target.files.length) addFiles(e.target.files); });
+  var drop = $('drop');
+  ['dragenter', 'dragover'].forEach(function (n) {
+    drop.addEventListener(n, function (e) { e.preventDefault(); drop.classList.add('over'); });
+  });
+  ['dragleave', 'drop'].forEach(function (n) {
+    drop.addEventListener(n, function (e) { e.preventDefault(); drop.classList.remove('over'); });
+  });
+  drop.addEventListener('drop', function (e) {
+    if (e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+  });
+
+  /* ---------- prompt ---------- */
+  function langRule(g) {
+    var core = 'Write like a native speaker texting: natural everyday phrasing and slang of that language, never a word-for-word translation from English. Where the language marks gender (verbs, adjectives, pronouns), use masculine forms for him as the speaker and feminine forms for her. Do not mix in English unless she does. Check spelling and grammar twice.';
+    if (g.lang === 'auto') {
+      return 'Reply in the same language and script she uses in her latest message. Any language is possible: Hindi, Marathi, Tamil, Telugu, Kannada, Malayalam, Bengali, Gujarati, Punjabi, Urdu, English, or a mix such as Hinglish. If she types in Roman letters, reply in Roman letters; if she types in her own script, reply in that script. If there is no message from her, use the language of the chat history or the saved notes, and English if there is none. ' + core;
+    }
+    if (g.lang === 'Hinglish') return 'Write in Hinglish: Hindi in Roman letters mixed naturally with English, the way people text. ' + core;
+    return 'Write the options in ' + g.lang + ', using its native script unless the chat history shows she types it in Roman letters. ' + core;
+  }
+
+  function buildPrompt(her, tweakKey, hasImages, search) {
+    var g = girl(), s = S(), m = MODES[s.mode];
+    var intent = $('intent').value.trim();
+    var p = [];
+    p.push('You are a texting coach. A guy is chatting with a girl he likes and needs the next message to send her. Write messages he can send as they are, in his voice.');
+    p.push('MODE\n' + m.brief);
+    if (g.notes) p.push('WHAT HE TOLD YOU ABOUT HER:\n' + g.notes);
+    if (g.memory) p.push('NOTES YOU SAVED FROM EARLIER (facts about her and the chat so far):\n' + g.memory);
+    var log = g.log.slice(-20);
+    if (log.length) {
+      p.push('RECENT MESSAGES FROM THIS APP, oldest first (She = her, He = him):\n' + log.map(function (e) { return (e.r === 'her' ? 'She: ' : 'He: ') + e.x; }).join('\n'));
+    }
+    if (her) {
+      p.push('HER LATEST MESSAGE(S). The conversation may start anywhere and you may have no background:\n"""\n' + her + '\n"""');
+    } else {
+      p.push('HER LATEST MESSAGE(S): none was given. He wants to send the next message himself, to start the chat, restart it or follow up. Use the saved notes, recent messages, chat history and any screenshots to choose the best next message. If there is no history at all, write three strong openers that fit what you know about her.');
+    }
+    p.push('TODAY: ' + new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '. Never state a date, festival, match result or event unless you are sure it is real and current.');
+    if (intent) p.push('WHAT HE WANTS TO DO WITH THIS REPLY: ' + intent);
+    var xnote = $('ctxNote').value.trim();
+    if (xnote) p.push('EXTRA CONTEXT FROM HIM (use it to shape the message, but only use what fits naturally):\n' + xnote);
+    if (s.task === 'topic') {
+      p.push('TASK: CHANGE THE TOPIC. He wants to steer the chat somewhere new without it feeling abrupt. Write 3 messages, each opening a different new topic with a smooth bridge from where the chat is now: a detail she mentioned, her mood, or a playful pivot. If she sent a message, briefly acknowledge it first. Choose topics from her interests, the notes, the chat history and the extra context' + (search ? ', and from what is trending today' : '') + '. If he typed a topic under WHAT HE WANTS, use that topic for all three and give three different bridges. In "label" put the new topic in one to three words. End each message with an easy hook for her to answer.');
+    } else {
+      p.push('TASK: NEXT MESSAGE. Write the best reply to her latest message, or the best next message if she sent none.');
+    }
+    if (search) {
+      p.push('FRESH REFERENCES: Search the web now for what is current today in ' + (s.region || 'India') + ': trending topics, memes, news, new films, shows, songs, sports and viral moments that would interest HER (go by her language, interests and the notes). Work in at most one fresh reference per option, only if you actually found it in search, it is harmless and it fits naturally. Never invent a trend, meme or news item. Avoid sensitive news such as deaths, disasters, crime, politics and religion. If nothing fits, skip it. Put what the reference is, in a few words, in "buzz".');
+    }
+
+    var tf = g.chats;
+    if (tf.length) {
+      var per = Math.floor(TEXT_BUDGET / tf.length);
+      var ctx = tf.map(function (f) {
+        var cut = f.text.length > per;
+        return '--- Chat file: ' + f.name + (cut ? ' (older part trimmed, most recent kept)' : '') + ' ---\n' + f.text.slice(-per);
+      }).join('\n\n');
+      p.push('CHAT HISTORY FOR CONTEXT (use it for facts, tone, running jokes and who is who):\n' + ctx);
+    }
+    if (g.herName || g.meName) {
+      p.push('In the chat history' + (g.herName ? ' she appears as "' + g.herName + '"' : '') + (g.herName && g.meName ? ' and' : '') + (g.meName ? ' he (the user) appears as "' + g.meName + '"' : '') + '.');
+    }
+    if (hasImages) p.push('ATTACHED IMAGES: screenshots or pages of their chat, oldest first. In chat screenshots, messages on the right are usually his and messages on the left are usually hers.');
+
+    p.push([
+      'RULES',
+      '- Respond precisely to what she just said. Answer her question, react to her actual words, pick up the specific detail she gave. Never answer a different message.',
+      '- If her message is only a greeting (hi, hello, hey, good morning, namaste, namaskar, vanakkam and so on), do not just greet back. Greet her in her language and add a small hook that gets her talking: a playful question, a light tease or a specific observation. Make it memorable.',
+      '- Use the chat history, notes and recent messages only for facts, tone and inside jokes. Do not invent shared memories, plans or details about either of them that you were not given. If you lack context, stay general and keep the message open instead of guessing.',
+      '- LANGUAGE: ' + langRule(g),
+      '- Match her energy and roughly her message length. Write like a real person texting: casual and specific. No pickup-line cliches, no poetic or corporate phrasing.',
+      '- Butterflies come from noticing something specific about her, a little playful tension, one small honest or vulnerable line, and momentum. Flatter with specifics, never generic lines like "you are so beautiful". Keep flirting light and tasteful, nothing explicit.',
+      '- End most options with an easy hook she can answer (a question or a tease), unless the moment calls for a clean close.',
+      '- LENGTH: ' + (s.length === 'short' ? 'each option is one short text, about 15 words at most.' : 'each option is one to three short sentences.'),
+      '- EMOJI: ' + (s.emoji === 'none' ? 'no emojis.' : 'at most one emoji per option, only where it adds tone.'),
+      '- Give exactly 3 options that take clearly different angles, not rewordings of each other.',
+      '- If her message shows she is uninterested, upset, uncomfortable or has said no, do not try to win her back with pressure. Say so in "heads_up" and make the options a graceful, respectful reply.',
+      '- In every mode, never write anything that insults her, pressures her, guilt-trips her, controls her or ignores a boundary.',
+      '- In "meaning", give a faithful English translation of each option so he can check what he is sending. Leave it an empty string if the option is already in English. Keep label, why, read and heads_up in English.'
+    ].join('\n'));
+
+    if (tweakKey && TWEAKS[tweakKey]) p.push('REFINE: ' + TWEAKS[tweakKey][1]);
+    if (tweakKey && st.last && st.last.replies.length) {
+      p.push('PREVIOUS OPTIONS (give new ones, do not repeat these):\n' + st.last.replies.map(function (r) { return '- ' + r.text; }).join('\n'));
+    }
+    p.push('OUTPUT: reply with only JSON in this shape: {"language": "<language and script of her messages, like Marathi (Devanagari)>", "read": "<one short line on her mood and what she is after>", "heads_up": "<empty string, or one short sentence if there is a real concern>", "replies": [{"label": "<one or two words for the style, or the new topic when changing the topic>", "text": "<the message to send>", "meaning": "<English translation of text, or empty if text is English>", "buzz": "<the fresh trend, meme or news item used, in a few words, or empty>", "why": "<one short line on why it lands>"}], "memory": "<rewrite the saved notes about her in under 600 characters: the language and script she uses, interests, humor, likes and dislikes, boundaries, running jokes, where the chat stands. Keep earlier facts that still matter. Only facts you were given, no guesses.>"}');
+    return p.join('\n\n');
+  }
+
+  /* ---------- parsing ---------- */
+  function cleanReplies(arr) {
+    return (Array.isArray(arr) ? arr : [])
+      .filter(function (r) { return r && typeof r.text === 'string' && r.text.trim(); })
+      .slice(0, 3)
+      .map(function (r) {
+        return {
+          label: str(r.label, 30).trim(),
+          text: r.text.trim(),
+          meaning: str(r.meaning, 600).trim(),
+          buzz: str(r.buzz, 200).trim(),
+          why: str(r.why, 300).trim()
+        };
+      });
+  }
+
+  function normalize(v) {
+    if (Array.isArray(v)) v = { replies: v };
+    if (!v || typeof v !== 'object') return null;
+    var rep = cleanReplies(v.replies);
+    if (!rep.length) return null;
+    return {
+      read: str(v.read, 300).trim(),
+      heads: str(v.heads_up, 300).trim(),
+      lang: str(v.language, 40).trim(),
+      memory: str(v.memory, MEM_MAX).trim(),
+      replies: rep
+    };
+  }
+
+  function parseJsonLoose(raw) {
+    var t = String(raw || '').trim();
+    if (!t) return null;
+    var cands = [];
+    var fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    if (fence) cands.push(fence[1]);
+    var a = t.indexOf('{'), b = t.lastIndexOf('}');
+    if (a >= 0 && b > a) cands.push(t.slice(a, b + 1));
+    var a2 = t.indexOf('['), b2 = t.lastIndexOf(']');
+    if (a2 >= 0 && b2 > a2) cands.push(t.slice(a2, b2 + 1));
+    cands.push(t);
+    for (var i = 0; i < cands.length; i++) {
+      try {
+        var res = normalize(JSON.parse(cands[i]));
+        if (res) return res;
+      } catch (e) {}
+    }
+    return null;
+  }
+
+  /* ---------- render ---------- */
+  async function copyText(text, btn, node) {
+    var done = function (label) {
+      btn.textContent = label;
+      setTimeout(function () { btn.textContent = 'Copy'; }, 1800);
+    };
+    try {
+      await navigator.clipboard.writeText(text);
+      done('Copied');
+      return true;
+    } catch (e) {
+      try {
+        var r = document.createRange();
+        r.selectNodeContents(node);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(r);
+      } catch (e2) {}
+      done('Selected, now copy');
+      return false;
+    }
+  }
+
+  function card(r, track) {
+    var c = el('article', 'card');
+    var top = el('div', 'ctop');
+    var bubble = el('p', 'bubble', r.text);
+    var b = el('button', 'copy', 'Copy');
+    b.type = 'button';
+    b.addEventListener('click', function () {
+      copyText(r.text, b, bubble).then(function (ok) { if (ok && track) pushLog('me', r.text); });
+    });
+    top.append(el('span', 'clabel', r.label || 'Option'), b);
+    c.append(top, bubble);
+    if (r.meaning) {
+      var mn = el('p', 'mean');
+      mn.append(el('b', null, 'In English: '), document.createTextNode(r.meaning));
+      c.append(mn);
+    }
+    if (r.buzz) {
+      var bz = el('p', 'mean');
+      bz.append(el('b', null, 'Fresh: '), document.createTextNode(r.buzz));
+      c.append(bz);
+    }
+    if (r.why) c.append(el('p', 'why', r.why));
+    return c;
+  }
+
+  function header(text, tags) {
+    var h = el('div', 'rhead');
+    h.append(el('h2', 'lbl', text));
+    var box = el('div', 'pills');
+    (tags || []).forEach(function (t) { box.append(el('span', 'pill' + (t[1] ? ' mode' : ''), t[0])); });
+    h.append(box);
+    return h;
+  }
+
+  function renderExample() {
+    var box = $('results');
+    box.replaceChildren();
+    box.append(header('Replies', [['Example', false]]));
+    box.append(el('p', 'read', 'Example for the message “' + HER_EXAMPLE + '”. Add what she said and tap the button to get three of your own, in her language.'));
+    var cards = el('div', 'cards');
+    EXAMPLES[S().mode].forEach(function (r) { cards.append(card(r, false)); });
+    box.append(cards);
+  }
+
+  function renderBusy() {
+    var box = $('results');
+    box.replaceChildren();
+    box.append(header('Writing', [[MODES[S().mode].name, true]]));
+    box.append(el('p', 'read', 'Reading her message and your chat. This usually takes 10 to 30 seconds.'));
+    var cards = el('div', 'cards');
+    for (var i = 0; i < 3; i++) cards.append(el('div', 'sk'));
+    box.append(cards);
+    box.scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
+  }
+
+  function renderResults() {
+    var L = st.last;
+    var box = $('results');
+    box.replaceChildren();
+    var tags = [[MODES[L.mode].name, true]];
+    if (L.lang) tags.push([L.lang, false]);
+    if (L.task === 'topic') tags.push(['Topic change', false]);
+    box.append(header('Replies', tags));
+    if (L.read) box.append(el('p', 'read', L.read));
+    if (L.heads) box.append(el('p', 'note', L.heads));
+    var cards = el('div', 'cards');
+    L.replies.forEach(function (r) { cards.append(card(r, true)); });
+    box.append(cards);
+
+    var tw = el('div', 'tweaks');
+    tw.append(el('span', 'lbl', 'Adjust'));
+    Object.keys(TWEAKS).forEach(function (k) {
+      var b = el('button', 'chip', TWEAKS[k][0]);
+      b.type = 'button';
+      b.addEventListener('click', function () { generate(k); });
+      tw.append(b);
+    });
+    var again = el('button', 'chip', 'New options');
+    again.type = 'button';
+    again.addEventListener('click', function () { generate('new'); });
+    tw.append(again);
+    box.append(tw);
+  }
+
+  function renderCurrent() { if (st.last) renderResults(); else renderExample(); }
+
+  function applyResult(res, her, modeUsed, taskUsed) {
+    var g = girl();
+    if (res.memory) g.memory = res.memory.slice(0, MEM_MAX);
+    if (res.lang) g.detected = res.lang.slice(0, 40);
+    if (her) pushLog('her', her);
+    persist();
+    st.last = { mode: modeUsed, task: taskUsed, read: res.read, heads: res.heads, lang: res.lang, replies: res.replies };
+    loadGirlUI();
+    renderResults();
+  }
+
+  /* ---------- models ---------- */
+  function toB64(blob) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { res(String(fr.result).split(',')[1] || ''); };
+      fr.onerror = function () { rej(new Error('read')); };
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  async function postJson(url, headers, body, signal) {
+    try {
+      var r = await fetch(url, { method: 'POST', headers: headers, body: JSON.stringify(body), signal: signal });
+      var j = null;
+      try { j = await r.json(); } catch (e) {}
+      return { ok: r.ok, status: r.status, json: j };
+    } catch (e) {
+      if (e && e.name === 'AbortError') throw { code: 'cancelled' };
+      throw { code: 'network' };
+    }
+  }
+
+  async function callGemini(prompt, blobs, signal, search) {
+    var s = S();
+    var parts = [{ text: prompt }];
+    for (var i = 0; i < blobs.length; i++) {
+      parts.push({ inline_data: { mime_type: blobs[i].type || 'image/jpeg', data: await toB64(blobs[i]) } });
+    }
+    var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(s.gemModel || 'gemini-2.5-flash') + ':generateContent';
+    var headers = { 'Content-Type': 'application/json', 'x-goog-api-key': s.gemKey };
+    function body(withSearch) {
+      var b = { contents: [{ role: 'user', parts: parts }], generationConfig: { temperature: 1 } };
+      if (withSearch) b.tools = [{ google_search: {} }];
+      else b.generationConfig.responseMimeType = 'application/json';
+      return b;
+    }
+    var used = search;
+    var r = await postJson(url, headers, body(search), signal);
+    if (!r.ok && search && r.status !== 401 && r.status !== 429) { used = false; r = await postJson(url, headers, body(false), signal); }
+    if (!r.ok) {
+      var c = r.status;
+      throw { code: c === 429 ? 'rate_limited' : (c === 400 || c === 401 || c === 403) ? 'bad_key' : c === 404 ? 'bad_model' : 'upstream_error' };
+    }
+    var j = r.json || {};
+    var cand = j.candidates && j.candidates[0];
+    if (!cand) throw { code: j.promptFeedback && j.promptFeedback.blockReason ? 'refused' : 'empty_completion' };
+    if (cand.finishReason === 'SAFETY') throw { code: 'refused' };
+    var text = ((cand.content && cand.content.parts) || []).map(function (p) { return p.text || ''; }).join('');
+    var res = parseJsonLoose(text);
+    if (!res) throw { code: 'invalid_json' };
+    res.noSearch = !!search && !used;
+    return res;
+  }
+
+  async function callOpenAI(prompt, blobs, signal, search) {
+    var s = S();
+    var content = [{ type: 'input_text', text: prompt }];
+    for (var i = 0; i < blobs.length; i++) {
+      content.push({ type: 'input_image', image_url: 'data:' + (blobs[i].type || 'image/jpeg') + ';base64,' + await toB64(blobs[i]) });
+    }
+    var headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + s.gptKey };
+    function body(withSearch) {
+      var b = { model: s.gptModel || 'gpt-6-luna', input: [{ role: 'user', content: content }] };
+      if (withSearch) b.tools = [{ type: 'web_search', search_context_size: 'low' }];
+      else b.text = { format: { type: 'json_object' } };
+      return b;
+    }
+    var used = search;
+    var r = await postJson('https://api.openai.com/v1/responses', headers, body(search), signal);
+    if (!r.ok && search && r.status !== 401 && r.status !== 429) { used = false; r = await postJson('https://api.openai.com/v1/responses', headers, body(false), signal); }
+    if (!r.ok) {
+      var c = r.status;
+      throw { code: c === 401 ? 'bad_key' : c === 429 ? 'rate_limited' : c === 404 ? 'bad_model' : c === 400 ? 'bad_request' : 'upstream_error' };
+    }
+    var j = r.json || {};
+    var text = typeof j.output_text === 'string' ? j.output_text : (j.output || [])
+      .filter(function (it) { return it && it.type === 'message'; })
+      .map(function (it) { return (it.content || []).map(function (c2) { return c2.text || ''; }).join(''); })
+      .join('');
+    if (!text) throw { code: 'empty_completion' };
+    var res = parseJsonLoose(text);
+    if (!res) throw { code: 'invalid_json' };
+    res.noSearch = !!search && !used;
+    return res;
+  }
+
+  function errCopy(code) {
+    switch (code) {
+      case 'not_granted': return 'Claude access was declined for this page. Reload it and allow access to write replies.';
+      case 'sampling_disabled':
+      case 'capability_disabled':
+      case 'capability_removed':
+      case 'not_declared': return 'Writing with Claude is not available for this account.';
+      case 'rate_limited': return 'Too many requests, or the limit or credit is used up. Wait a bit, or switch to another model.';
+      case 'session_expired': return 'Sign in to Claude again, then try once more.';
+      case 'image_rejected': return "One of the screenshots couldn't be read. Remove it or use a PNG or JPG.";
+      case 'images_unavailable': return "Screenshots can't be sent here. Paste the text instead.";
+      case 'prompt_too_large': return 'That is a lot of chat. Remove a saved chat or use a shorter export.';
+      case 'refused': return "The model wouldn't write that one. Change what you want to say and try again.";
+      case 'bad_key': return 'The provider rejected the key. Check it in the box under Write with.';
+      case 'bad_model':
+      case 'bad_request': return 'The provider did not accept the request. Check the model name under Settings and data.';
+      case 'network': return "Can't reach the internet. The app opens offline, but writing messages needs a connection.";
+      case 'empty_completion':
+      case 'invalid_json': return 'The answer came back unusable. Tap the button to try again.';
+      default: return 'Something went wrong on the way. Try again.';
+    }
+  }
+
+  function setBusy(b) {
+    st.busy = b;
+    $('stop').hidden = !b;
+    if (b) { $('go').disabled = true; $('go').textContent = 'Writing...'; }
+    else { $('go').disabled = false; updateGo(); }
+  }
+
+  async function generate(tweakKey) {
+    if (st.busy) return;
+    var s = S();
+    var her = $('her').value.trim();
+    var key = tweakKey || (st.last ? 'new' : null);
+    var route = s.engine === 'claude' ? 'claude' : (s.engine === 'gemini' ? 'gemini' : 'openai');
+    if (route !== 'claude' && IN_CLAUDE) {
+      setMsg("This Claude page can't connect to " + ENGINES[s.engine].name + '. Open the installed Wingline app, where your key works, or switch to Claude here.', true);
+      return;
+    }
+    if (route !== 'claude' && !curKey()) {
+      setMsg('Paste your ' + (route === 'gemini' ? 'Gemini' : 'OpenAI') + ' API key in the box under Write with. It stays on this phone.', true);
+      $('keyBox').hidden = false;
+      $('apiKey').focus();
+      return;
+    }
+
+    var blobs = [];
+    st.files.forEach(function (f) { blobs = blobs.concat(f.blobs); });
+    var note = '';
+    var sample = null;
+    if (route === 'claude') {
+      sample = await samplePromise;
+      if (!sample) { setMsg('Writing with Claude needs this page opened inside Claude.', true); return; }
+      if (blobs.length) {
+        var lim = null;
+        try { lim = await sample.limits(); } catch (e) {}
+        var max = lim && lim.images ? lim.images.maxCount : 0;
+        if (!max) { note = "Screenshots can't be sent here, so only text was used."; blobs = []; }
+        else if (blobs.length > max) { note = 'Only the last ' + max + ' images were used.'; blobs = blobs.slice(-max); }
+      }
+    }
+    setMsg('');
+
+    var search = route !== 'claude' && $('buzz').checked;
+    var prompt = buildPrompt(her, key, blobs.length > 0, search);
+    var ctl = new AbortController();
+    st.ctl = ctl;
+    var modeUsed = s.mode;
+    var taskUsed = s.task;
+    setBusy(true);
+    renderBusy();
+    try {
+      var res;
+      if (route === 'claude') {
+        var opts = { signal: ctl.signal, cache: false, modelTier: s.light ? 'quick' : 'default' };
+        if (blobs.length) opts.images = blobs;
+        res = normalize(await sample.json(prompt, opts));
+      } else if (route === 'gemini') {
+        res = await callGemini(prompt, blobs, ctl.signal, search);
+      } else {
+        res = await callOpenAI(prompt, blobs, ctl.signal, search);
+      }
+      if (!res) throw { code: 'invalid_json' };
+      applyResult(res, her, modeUsed, taskUsed);
+      if (res.noSearch) note = "Live search wasn't available for this model, so this one was written without today's trends.";
+      if (note) setMsg(note);
+    } catch (e) {
+      if (!e || e.code !== 'cancelled') setMsg(errCopy(e && e.code), true);
+      renderCurrent();
+    } finally {
+      st.ctl = null;
+      setBusy(false);
+    }
+  }
+
+  $('go').addEventListener('click', function () { generate(null); });
+  $('stop').addEventListener('click', function () { if (st.ctl) st.ctl.abort(); });
+
+  /* ---------- backup ---------- */
+  async function saveFile(filename, text) {
+    if (IN_CLAUDE) {
+      var dl = await window.claude.use('downloads');
+      if (!dl) throw new Error('unavailable');
+      await dl.save({ filename: filename, data: text });
+      return;
+    }
+    var blob = new Blob([text], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+
+  $('exp').addEventListener('click', async function () {
+    var out = { app: 'wingline', v: 1, exported: new Date().toISOString(), girls: D.girls };
+    var name = 'wingline-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    try {
+      await saveFile(name, JSON.stringify(out));
+      $('dataMsg').textContent = 'Backup ready.';
+    } catch (e) {
+      $('dataMsg').textContent = e && e.code === 'declined' ? 'Backup cancelled.' : "Couldn't save the backup here.";
+    }
+  });
+
+  $('imp').addEventListener('change', async function (e) {
+    var f = e.target.files[0];
+    $('imp').value = '';
+    if (!f) return;
+    try {
+      var j = JSON.parse(await f.text());
+      if (!j || j.app !== 'wingline' || !Array.isArray(j.girls)) throw new Error('shape');
+      var n = 0;
+      j.girls.slice(0, 50).forEach(function (o) { D.girls.push(cleanGirl(o, false)); n++; });
+      persist();
+      renderGirls();
+      $('dataMsg').textContent = 'Added ' + n + (n === 1 ? ' girl' : ' girls') + ' from the backup.';
+    } catch (err) {
+      $('dataMsg').textContent = "That file isn't a Wingline backup.";
+    }
+  });
+
+  /* ---------- start ---------- */
+  async function start() {
+    await Store.open();
+    var saved = await Store.get('state');
+    if (saved && Array.isArray(saved.girls)) {
+      D.girls = saved.girls.slice(0, 50).map(function (o) { return cleanGirl(o, true); });
+      D.activeId = typeof saved.activeId === 'string' ? saved.activeId : null;
+      var ss = saved.settings || {};
+      var d = D.settings;
+      if (MODES[ss.mode]) d.mode = ss.mode;
+      if (ss.length === 'short' || ss.length === 'medium') d.length = ss.length;
+      if (ss.emoji === 'none' || ss.emoji === 'few') d.emoji = ss.emoji;
+      if (ENGINES[ss.engine]) d.engine = ss.engine;
+      if (typeof ss.light === 'boolean') d.light = ss.light;
+      d.gemKey = str(ss.gemKey, 200);
+      d.gptKey = str(ss.gptKey, 300);
+      if (str(ss.gemModel, 80)) d.gemModel = str(ss.gemModel, 80);
+      if (str(ss.gptModel, 80)) d.gptModel = str(ss.gptModel, 80);
+      if (typeof ss.region === 'string') d.region = str(ss.region, 60);
+      if (typeof ss.buzz === 'boolean') d.buzz = ss.buzz;
+    }
+    if (!D.girls.length) addGirl();
+    if (!IN_CLAUDE && D.settings.engine === 'claude') D.settings.engine = 'gemini';
+    D.activeId = girl().id;
+
+    var m = Store.mode();
+    var note = m === 'mem' ? "This browser can't save data right now, so nothing will be kept after you close the page." : 'Girls, chats and notes are saved on this device.';
+    if (IN_CLAUDE) note += ' This website copy keeps its data in this browser only. Export a backup to move it into the phone app.';
+    $('storeNote').textContent = note;
+    if (!IN_CLAUDE && navigator.storage && navigator.storage.persist) { try { navigator.storage.persist(); } catch (e) {} }
+
+    syncUI();
+    loadGirlUI();
+    renderGirls();
+    renderFiles();
+    applyMode();
+    updateEngineUI();
+  }
+  start();
+})();
+</script>
+
+</body></html>
